@@ -42,20 +42,11 @@ class WxBot extends Wechat {
   }
 
   _tuning (word) {
-    let params = {
-      'key': '2ba083ae9f0016664dfb7ed80ba4ffa0',
-      'info': word
-    }
     return this.request({
       method: 'GET',
-      url: 'http://www.tuling123.com/openapi/api',
-      params: params
+      url: 'http://api.hitokoto.us/rand'
     }).then(res => {
-      let data = res.data
-      if (data.code === 100000) {
-        return data.text + '[微信机器人]'
-      }
-      throw new Error('tuning返回值code错误', data)
+      return res.data.hitokoto
     }).catch(err => {
       debug(err)
       return '现在思路很乱，最好联系下我哥 T_T...'
