@@ -12,6 +12,8 @@ import {
   getDeviceID
 } from './util'
 
+var stream = require('stream');
+
 const debug = _debug('core')
 
 export default class WechatCore {
@@ -572,12 +574,17 @@ export default class WechatCore {
           f: 'json'
         }
 
+        // Initiate the source
+        var bufferStream = new stream.PassThrough();
+        // Write your buffer
+        bufferStream.end(data.data);
+
         return this.request({
           method: 'POST',
           url: this.CONF.API_webwxuploadmedia,
           headers: data.headers,
           params: params,
-          data: data.data
+          data: bufferStream
         })
       }).then(res => {
         let data = res.data

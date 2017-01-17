@@ -1,6 +1,10 @@
 'use strict'
 const Wechat = require('../../index')
 const debug = require('debug')('wxbot')
+const QRCode = require('qrcode')
+const fs = require('fs')
+const path = require('path')
+
 
 class WxBot extends Wechat {
 
@@ -56,7 +60,31 @@ class WxBot extends Wechat {
   _botReply (msg) {
     if (this.replyUsers.has(msg['FromUserName'])) {
       this._tuning(msg['Content']).then(reply => {
-        this.sendText(reply, msg['FromUserName'])
+        // this.sendText(reply, msg['FromUserName'])
+
+        var filename = Date.now() + '.png'
+        var parentDir = path.resolve(process.cwd(), '..')
+        debug(parentDir)
+
+        var targetFilePath = parentDir + '/qrcode/' + filename
+        var _this = this
+        QRCode.save(targetFilePath, 'www.baidu.com', function (err, written) {
+          if (err) {
+            debug(err)
+            return
+          } else {
+            debug(written)
+          }
+          fs.readFile(targetFilePath, function (err, buffer) {
+            if (err) throw err;
+            let pic = {}
+            pic.file = buffer
+            pic.filename = filename
+            debug(pic)
+            _this.sendMsg(pic, msg['FromUserName'])
+          })
+        })
+
         debug(reply)
       })
     }
