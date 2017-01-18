@@ -60,13 +60,24 @@ class WxBot extends Wechat {
   _generateQr(link) {
     return new Promise((resolve, reject) => {
       var filename = Date.now() + '.png'
-      var parentDir = path.resolve(process.cwd(), '..')
+      var parentDir = path.resolve(__dirname, '..')
       var targetFilePath = parentDir + '/qrcode/' + filename
       QRCode.save(targetFilePath, link, function (err, written) {
         if (err) reject(err)
         else resolve({path: targetFilePath, filename: filename})
       })
     })
+  }
+
+  _generateQrMsg(link) {
+   return this._generateQr(link).then((qr) => {
+      return new Promise((resolve, reject) => {
+        fs.readFile(qr.path, function (err, buffer) {
+          if (err) reject(err);
+          else resolve({file: buffer, filename: qr.filename})
+        })
+      })
+    }) 
   }
 
   _botReply (msg) {
@@ -76,14 +87,7 @@ class WxBot extends Wechat {
         debug(reply)
       })
 
-      this._generateQr('www.baidu.com').then((qr) => {
-        return new Promise((resolve, reject) => {
-          fs.readFile(qr.path, function (err, buffer) {
-            if (err) reject(err);
-            else resolve({file: buffer, filename: qr.filename})
-          })
-        })
-      }).then((pic) => {
+      this._generateQrMsg('www.baidu.com').then((pic) => {
         this.sendMsg(pic, msg['FromUserName'])
       })
     }
