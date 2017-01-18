@@ -15,6 +15,7 @@ class WxBot extends Wechat {
 
     this.replyUsers = new Set()
     this.on('message', msg => {
+      debug(msg)
       if (msg.MsgType === this.CONF.MSGTYPE_TEXT) {
         this._botReply(msg)
       }
@@ -81,14 +82,16 @@ class WxBot extends Wechat {
   }
 
   _botReply (msg) {
+    if (msg.OriginalContent.endsWith('code')) {
+      this._generateQrMsg('http://weixin.qq.com/r/4FdVTXPEDi5xrTcu9wLy').then((pic) => {
+        this.sendMsg(pic, msg['FromUserName'])
+      })
+    }
+
     if (this.replyUsers.has(msg['FromUserName'])) {
       this._tuning(msg['Content']).then(reply => {
-        // this.sendText(reply, msg['FromUserName'])
+        this.sendText(reply, msg['FromUserName'])
         debug(reply)
-      })
-
-      this._generateQrMsg('www.baidu.com').then((pic) => {
-        this.sendMsg(pic, msg['FromUserName'])
       })
     }
   }

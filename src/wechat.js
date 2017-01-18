@@ -151,6 +151,7 @@ class Wechat extends WechatCore {
       return
     }
     if (data.AddMsgCount) {
+      debug(data)
       debug('syncPolling messages count: ', data.AddMsgCount)
       this.handleMsg(data.AddMsgList)
     }
