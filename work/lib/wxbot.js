@@ -57,24 +57,14 @@ class WxBot extends Wechat {
     })
   }
 
-  _generateQr(link, callback) {
-    var filename = Date.now() + '.png'
-    var parentDir = path.resolve(process.cwd(), '..')
-
-    var targetFilePath = parentDir + '/qrcode/' + filename
-    var _this = this
-    QRCode.save(targetFilePath, link, function (err, written) {
-      if (err) { 
-        debug(err)
-        callback(err, null)
-        return
-      }
-      fs.readFile(targetFilePath, function (err, buffer) {
-        if (err) throw err;
-        let pic = {}
-        pic.file = buffer
-        pic.filename = filename
-        callback(null, pic)
+  _generateQr(link) {
+    return new Promise((resolve, reject) => {
+      var filename = Date.now() + '.png'
+      var parentDir = path.resolve(process.cwd(), '..')
+      var targetFilePath = parentDir + '/qrcode/' + filename
+      QRCode.save(targetFilePath, link, function (err, written) {
+        if (err) reject(err)
+        else resolve({path: targetFilePath, filename: filename})
       })
     })
   }
@@ -85,7 +75,15 @@ class WxBot extends Wechat {
         // this.sendText(reply, msg['FromUserName'])
         debug(reply)
       })
-      this._generateQr('www.baidu.com', (err, pic) => {
+
+      this._generateQr('www.baidu.com').then((qr) => {
+        return new Promise((resolve, reject) => {
+          fs.readFile(qr.path, function (err, buffer) {
+            if (err) reject(err);
+            else resolve({file: buffer, filename: qr.filename})
+          })
+        })
+      }).then((pic) => {
         this.sendMsg(pic, msg['FromUserName'])
       })
     }
