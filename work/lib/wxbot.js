@@ -15,7 +15,9 @@ class WxBot extends Wechat {
 
     this.replyUsers = new Set()
     this.on('message', msg => {
-      debug(msg)
+      if (msg.msgType != 51) {
+        debug(msg)
+      }
       if (msg.MsgType === this.CONF.MSGTYPE_TEXT) {
         this._botReply(msg)
       }
@@ -72,12 +74,8 @@ class WxBot extends Wechat {
 
   _generateQrMsg(link) {
    return this._generateQr(link).then((qr) => {
-      return new Promise((resolve, reject) => {
-        fs.readFile(qr.path, function (err, buffer) {
-          if (err) reject(err);
-          else resolve({file: buffer, filename: qr.filename})
-        })
-      })
+        var stream = fs.createReadStream(qr.path)
+        return {file: stream, filename: qr.filename}
     }) 
   }
 
