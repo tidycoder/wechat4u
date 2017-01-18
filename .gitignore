@@ -2,6 +2,7 @@
 logs
 *.log
 npm-debug.log*
+work/qrcode/*.png
 
 # Runtime data
 pids
